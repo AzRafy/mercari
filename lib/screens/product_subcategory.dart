@@ -4,7 +4,9 @@ import 'package:mercari_app/screens/product_category.dart';
 import 'package:mercari_app/widgets/collection_images.dart';
 import 'package:mercari_app/widgets/drawer.dart';
 
+import '../utils/app-constants.dart';
 import '../utils/color_resources.dart';
+import '../widgets/custom_appbar.dart';
 import '../widgets/custom_searchbar.dart';
 
 class ProductSubcategory extends StatelessWidget {
@@ -12,26 +14,17 @@ class ProductSubcategory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
     return Scaffold(
       drawer: const CustomDrawer(),
       appBar: AppBar(
-        toolbarHeight: 100,
+        toolbarHeight: isTablet
+            ? AppConstants.screenHeight * 0.1
+            : AppConstants.screenHeight * 0.16,
         backgroundColor: ColorResources.appBarColor,
+        automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const CustomSearchbar(
-          placeholderText: 'Search for anything',
-          icon: Icon(Icons.search),
-          fillColor: ColorResources.appTextColor,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(
-              width: 1,
-              style: BorderStyle.solid,
-            ),
-            borderRadius: BorderRadius.all(
-              Radius.circular(100),
-            ),
-          ),
-        ),
+        title: const CustomAppbar(),
       ),
       body: Column(
         children: [

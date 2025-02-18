@@ -1,13 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:mercari_app/controllers/cart_controller.dart';
+import 'package:mercari_app/models/list_all_products_model.dart';
 import 'package:mercari_app/widgets/drawer.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../controllers/allproducts_controller.dart';
+import '../controllers/home_controller.dart';
+import '../models/productcategories_model.dart';
+import '../utils/app-constants.dart';
 import '../utils/color_resources.dart';
 import '../widgets/collection_images.dart';
+import '../widgets/custom_appbar.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_searchbar.dart';
 
-class ItemsDetail extends StatelessWidget {
-  const ItemsDetail({super.key});
+class ItemsDetail extends StatefulWidget {
+  final String productId;
+  const ItemsDetail({
+    super.key,
+    required this.productId,
+  });
+
+  @override
+  State<ItemsDetail> createState() => _ItemsDetailState();
+}
+
+class _ItemsDetailState extends State<ItemsDetail> {
+  final AllproductsController allProductsController = Get.find();
+  final CartController cartController = Get.put(CartController());
+  PageController pageController = PageController();
+
+  @override
+  void initState() {
+    super.initState();
+    allProductsController.getAllProducts();
+    // pageController = PageController(initialPage: widget.index);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,23 +45,13 @@ class ItemsDetail extends StatelessWidget {
     return Scaffold(
       drawer: const CustomDrawer(),
       appBar: AppBar(
-        toolbarHeight: isTablet ? 110 : 100,
+        toolbarHeight: isTablet
+            ? AppConstants.screenHeight * 0.1
+            : AppConstants.screenHeight * 0.16,
         backgroundColor: ColorResources.appBarColor,
+        automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const CustomSearchbar(
-          placeholderText: 'Search for anything',
-          icon: Icon(Icons.search),
-          fillColor: ColorResources.appTextColor,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(
-              width: 1,
-              style: BorderStyle.solid,
-            ),
-            borderRadius: BorderRadius.all(
-              Radius.circular(100),
-            ),
-          ),
-        ),
+        title: const CustomAppbar(),
       ),
       body: ListView(
         children: [
@@ -63,6 +83,11 @@ class ItemsDetail extends StatelessWidget {
                                       indicatorPadding: 10,
                                       indicatorRadius: 5,
                                       children: [
+                                        // Image.network(
+                                        //   homeController.productCategoryData!
+                                        //       .first.image!.src,
+                                        //   fit: BoxFit.cover,
+                                        // ),
                                         Image.asset(
                                           CollectionImages.itemsList[0],
                                           fit: BoxFit.cover,
@@ -221,10 +246,15 @@ class ItemsDetail extends StatelessWidget {
                                       MediaQuery.of(context).size.height * 0.1,
                                   child: Stack(
                                     children: [
-                                      const CustomSearchbar(
+                                      CustomSearchbar(
+                                        onEmailChanged: (p0) {},
+                                        onPasswordChanged: (p0) {},
+                                        onTextFieldChanged: (p0) {},
+                                        onPasswordStrengthChanged:
+                                            (p0, p1, p2, p3) {},
                                         placeholderText: 'Add your comment',
                                         fillColor: Colors.transparent,
-                                        border: OutlineInputBorder(
+                                        border: const OutlineInputBorder(
                                           borderSide: BorderSide(
                                             width: 0,
                                             style: BorderStyle.none,
@@ -234,6 +264,7 @@ class ItemsDetail extends StatelessWidget {
                                             Radius.circular(100),
                                           ),
                                         ),
+                                        onSearchChanged: (value) {},
                                       ),
                                       Positioned(
                                         right: 10,
@@ -326,7 +357,10 @@ class ItemsDetail extends StatelessWidget {
                                         children: [
                                           Expanded(
                                             child: CustomButton(
-                                              text: 'Make offer',
+                                              textPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 0),
+                                              text: 'Add to cart',
                                               bgcolor:
                                                   ColorResources.borderColor,
                                               textcolor: ColorResources
@@ -341,11 +375,11 @@ class ItemsDetail extends StatelessWidget {
                                           ),
                                           Expanded(
                                             child: CustomButton(
-                                              text: 'Add to cart',
-                                              bgcolor:
-                                                  ColorResources.borderColor,
-                                              textcolor: ColorResources
-                                                  .normalTextColor,
+                                              text: 'Buy now',
+                                              bgcolor: ColorResources
+                                                  .appButtonBGColor,
+                                              textcolor:
+                                                  ColorResources.appTextColor,
                                               btnSize: Theme.of(context)
                                                   .textTheme
                                                   .displaySmall,
@@ -361,28 +395,7 @@ class ItemsDetail extends StatelessWidget {
                                       const SizedBox(
                                         height: 20,
                                       ),
-                                      SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        child: const CustomButton(
-                                          text: 'Buy now',
-                                          bgcolor:
-                                              ColorResources.appButtonBGColor,
-                                          textcolor:
-                                              ColorResources.appTextColor,
-                                          btnSize: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                          textPadding: EdgeInsets.symmetric(
-                                            horizontal: 20,
-                                            vertical: 15,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 20,
-                                      ),
+
                                       GestureDetector(
                                         onTap: () {},
                                         child: Container(
@@ -917,32 +930,85 @@ class ItemsDetail extends StatelessWidget {
                   children: [
                     Stack(
                       children: [
-                        ImageSlideshow(
-                          height: MediaQuery.of(context).size.height * 0.55,
-                          width: MediaQuery.of(context).size.width,
-                          isLoop: false,
-                          indicatorBottomPadding: 30,
-                          indicatorPadding: 10,
-                          indicatorRadius: 5,
-                          children: [
-                            Image.asset(
-                              CollectionImages.itemsList[0],
-                              fit: BoxFit.cover,
-                            ),
-                            Image.asset(
-                              CollectionImages.itemsList[1],
-                              fit: BoxFit.cover,
-                            ),
-                            Image.asset(
-                              CollectionImages.itemsList[2],
-                              fit: BoxFit.cover,
-                            ),
-                            Image.asset(
-                              CollectionImages.itemsList[3],
-                              fit: BoxFit.cover,
-                            ),
-                          ],
-                        ),
+                        GetBuilder<AllproductsController>(
+                            builder: (controller) {
+                          final getImageSlider = controller.listOfProducts;
+                          print(getImageSlider);
+                          final products = getImageSlider?.expand((image) {
+                            return image.images.map((e) {
+                              return e.src;
+                            });
+                          }).toList();
+                          if (products != null && products.isNotEmpty) {
+                            return Column(
+                              children: [
+                                Stack(
+                                  children: [
+                                    SizedBox(
+                                      height: AppConstants.screenHeight * 0.55,
+                                      width: AppConstants.screenWidth,
+                                      child: PageView.builder(
+                                        controller: pageController,
+                                        itemCount: products.length,
+                                        itemBuilder: (context, index) {
+                                          print(products);
+                                          return Image.network(
+                                            products[index].toString(),
+                                            fit: BoxFit.cover,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: AppConstants.screenWidth * 0.05,
+                                      left: AppConstants.screenWidth * 0.45,
+                                      child: SmoothPageIndicator(
+                                        controller: pageController,
+                                        count: 4,
+                                        effect: const WormEffect(
+                                          dotHeight: 12,
+                                          dotWidth: 12,
+                                          activeDotColor: Colors.white,
+                                          dotColor: Colors.grey,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            );
+                          }
+                          return ImageSlideshow(
+                            height: MediaQuery.of(context).size.height * 0.55,
+                            width: MediaQuery.of(context).size.width,
+                            isLoop: false,
+                            indicatorBottomPadding: 30,
+                            indicatorPadding: 10,
+                            indicatorRadius: 5,
+                            children: [
+                              // Image.network(
+                              //   image.src,
+                              //   fit: BoxFit.cover,
+                              // ),
+                              Image.asset(
+                                CollectionImages.itemsList[0],
+                                fit: BoxFit.cover,
+                              ),
+                              Image.asset(
+                                CollectionImages.itemsList[1],
+                                fit: BoxFit.cover,
+                              ),
+                              Image.asset(
+                                CollectionImages.itemsList[2],
+                                fit: BoxFit.cover,
+                              ),
+                              Image.asset(
+                                CollectionImages.itemsList[3],
+                                fit: BoxFit.cover,
+                              ),
+                            ],
+                          );
+                        }),
                         Positioned(
                           right: 20,
                           top: 20,
@@ -954,35 +1020,52 @@ class ItemsDetail extends StatelessWidget {
                                   color: ColorResources.normalTextColor,
                                   borderRadius: BorderRadius.circular(100),
                                 ),
-                                child: const Icon(
-                                  Icons.more_horiz,
-                                  color: ColorResources.appTextColor,
+                                child: PopupMenuButton<String>(
+                                  onSelected: (value) {},
+                                  itemBuilder: (BuildContext context) =>
+                                      <PopupMenuEntry<String>>[
+                                    PopupMenuItem<String>(
+                                      value: 'share',
+                                      child: Text('Share'),
+                                    ),
+                                    PopupMenuItem<String>(
+                                      value: 'sell',
+                                      child: Text('Sell similar item'),
+                                    ),
+                                  ],
+                                  child: const Icon(
+                                    Icons.more_horiz,
+                                    color: ColorResources.appTextColor,
+                                  ),
                                 )),
                           ),
                         ),
                         Positioned(
                           bottom: 50,
                           right: 20,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: ColorResources.appTextColor,
-                              borderRadius: BorderRadius.circular(50),
-                            ),
-                            child: const Row(
-                              children: [
-                                Text("0"),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Icon(
-                                  Icons.favorite_border,
-                                  color: ColorResources.normalTextColor,
-                                ),
-                              ],
+                          child: GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: ColorResources.appTextColor,
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Text("0"),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Icon(
+                                    Icons.favorite_border,
+                                    color: ColorResources.normalTextColor,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -1049,14 +1132,18 @@ class ItemsDetail extends StatelessWidget {
                         children: [
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.44,
-                            child: CustomButton(
-                              text: 'Make offer',
-                              bgcolor: ColorResources.borderColor,
-                              textcolor: ColorResources.normalTextColor,
-                              btnSize: Theme.of(context).textTheme.displaySmall,
-                              textPadding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 15,
+                            child: GestureDetector(
+                              onTap: () {},
+                              child: CustomButton(
+                                text: 'Add to cart', // on mobile
+                                bgcolor: ColorResources.borderColor,
+                                textcolor: ColorResources.normalTextColor,
+                                btnSize:
+                                    Theme.of(context).textTheme.displaySmall,
+                                textPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 15,
+                                ),
                               ),
                             ),
                           ),
@@ -1064,13 +1151,13 @@ class ItemsDetail extends StatelessWidget {
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.44,
                             child: CustomButton(
-                              text: 'Add to cart',
-                              bgcolor: ColorResources.borderColor,
-                              textcolor: ColorResources.normalTextColor,
-                              btnSize: Theme.of(context).textTheme.displaySmall,
+                              text: 'Buy now',
+                              bgcolor: ColorResources.appButtonBGColor,
+                              textcolor: ColorResources.appTextColor,
+                              btnSize: Theme.of(context).textTheme.labelSmall,
                               textPadding: const EdgeInsets.symmetric(
                                 horizontal: 20,
-                                vertical: 15,
+                                vertical: 14,
                               ),
                             ),
                           ),
@@ -1080,25 +1167,7 @@ class ItemsDetail extends StatelessWidget {
                     const SizedBox(
                       height: 15,
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      child: const CustomButton(
-                        text: 'Buy now',
-                        bgcolor: ColorResources.appButtonBGColor,
-                        textcolor: ColorResources.appTextColor,
-                        btnSize: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        textPadding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 15,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
+
                     GestureDetector(
                       onTap: () {},
                       child: Container(
@@ -1444,10 +1513,14 @@ class ItemsDetail extends StatelessWidget {
                       height: MediaQuery.of(context).size.height * 0.12,
                       child: Stack(
                         children: [
-                          const CustomSearchbar(
+                          CustomSearchbar(
+                            onEmailChanged: (p0) {},
+                            onPasswordChanged: (p0) {},
+                            onTextFieldChanged: (p0) {},
+                            onPasswordStrengthChanged: (p0, p1, p2, p3) {},
                             placeholderText: 'Add your comment',
                             fillColor: Colors.transparent,
-                            border: OutlineInputBorder(
+                            border: const OutlineInputBorder(
                               borderSide: BorderSide(
                                 width: 0,
                                 style: BorderStyle.none,
@@ -1457,6 +1530,7 @@ class ItemsDetail extends StatelessWidget {
                                 Radius.circular(100),
                               ),
                             ),
+                            onSearchChanged: (value) {},
                           ),
                           Positioned(
                             right: 10,

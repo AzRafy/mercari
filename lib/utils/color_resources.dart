@@ -10,4 +10,7 @@ class ColorResources {
   static const normalTextColor = Color(0xff222222);
   static const borderColor = Color(0xffecedf1);
   static const paragraphColor = Color(0xff6b6b6b);
+  static const dividerColor = Color(0xffcdced2);
+  static const btnborderColor = Color(0xffdadce0);
+  static const ratingColor = Colors.amber;
 }

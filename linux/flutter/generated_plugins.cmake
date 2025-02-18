@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  open_file_linux
+  flutter_localization
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

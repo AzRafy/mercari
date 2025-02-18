@@ -1,36 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mercari_app/controllers/allproducts_controller.dart';
+import '../controllers/home_controller.dart';
+import '../utils/app-constants.dart';
 import '../utils/color_resources.dart';
 import '../widgets/collection_images.dart';
+import '../widgets/custom_appbar.dart';
 import '../widgets/custom_searchbar.dart';
 import '../widgets/drawer.dart';
 import 'product_subcategory.dart';
+import 'view_products.dart';
 
-class ProductCategory extends StatelessWidget {
+class ProductCategory extends StatefulWidget {
   const ProductCategory({super.key});
 
   @override
+  State<ProductCategory> createState() => _ProductCategoryState();
+}
+
+class _ProductCategoryState extends State<ProductCategory> {
+  final HomeController homeController = Get.find();
+  final AllproductsController allproductsController =
+      Get.put(AllproductsController());
+  @override
   Widget build(BuildContext context) {
+    final isTablet = MediaQuery.of(context).size.width > 600;
+    final categories = homeController.productCategoryData;
+
     return Scaffold(
       drawer: const CustomDrawer(),
       appBar: AppBar(
-        toolbarHeight: 100,
+        toolbarHeight: isTablet
+            ? AppConstants.screenHeight * 0.1
+            : AppConstants.screenHeight * 0.16,
         backgroundColor: ColorResources.appBarColor,
+        automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const CustomSearchbar(
-          placeholderText: 'Search for anything',
-          icon: Icon(Icons.search),
-          fillColor: ColorResources.appTextColor,
-          border: OutlineInputBorder(
-            borderSide: BorderSide(
-              width: 1,
-              style: BorderStyle.solid,
-            ),
-            borderRadius: BorderRadius.all(
-              Radius.circular(100),
-            ),
-          ),
-        ),
+        title: const CustomAppbar(),
       ),
       body: Column(
         children: [
@@ -38,39 +44,49 @@ class ProductCategory extends StatelessWidget {
             height: 20,
           ),
           Expanded(
-            child: GestureDetector(
-              onTap: () {
-                Get.off(
-                  () => const ProductSubcategory(),
-                );
-              },
-              child: ListView.separated(
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    leading: ClipOval(
-                      child: Image.asset(
-                        CollectionImages.productCategory[index]['image']
-                            .toString(),
-                        width: 32,
-                        height: 32,
-                        fit: BoxFit.cover,
+            child: ListView.separated(
+              itemBuilder: (context, index) {
+                if (categories.isNotEmpty) {
+                  final product = categories[index].image?.src;
+                  return GestureDetector(
+                    onTap: () {
+                      Get.to(
+                        () => ViewProducts(
+                          categoryId: categories[index].id.toString(),
+                        ),
+                      );
+                    },
+                    child: ListTile(
+                      leading: ClipOval(
+                        child: Image.network(
+                          (product != null && product.isNotEmpty)
+                              ? product
+                              : "$product",
+                          height: isTablet ? 150 : 120,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      title: Text(
+                        categories[index].name,
+                        style: Theme.of(context).textTheme.displaySmall,
+                      ),
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
                       ),
                     ),
-                    title: Text(CollectionImages.productCategory[index]['title']
-                        .toString()),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
                   );
-                },
-                itemCount: CollectionImages.productCategory.length,
-                separatorBuilder: (BuildContext context, int index) {
-                  return const Divider(
-                    color: ColorResources.borderColor,
-                  );
-                },
-              ),
+                }
+                return const Center(
+                  child: Text('No Products Available'),
+                );
+              },
+              itemCount: categories!.length - 1,
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider(
+                  color: ColorResources.borderColor,
+                );
+              },
             ),
           ),
           const SizedBox(
